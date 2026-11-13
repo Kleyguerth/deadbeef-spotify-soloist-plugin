@@ -38,7 +38,7 @@ std::string get_conf_str(const char* key, const char* def) {
 
 void apply_soloist_config() {
     if (!deadbeef) return;
-    int port = deadbeef->conf_get_int("spotify_soloist.ws_port", 9090);
+    int port = deadbeef->conf_get_int("spotify_soloist.ws_port", 9099);
     bool auto_spawn = deadbeef->conf_get_int("spotify_soloist.auto_spawn", 1) != 0;
     std::string path = get_conf_str("spotify_soloist.soloist_path", "");
     std::string dev = get_conf_str("spotify_soloist.device_name", "");
@@ -238,7 +238,7 @@ const char* spotify_exts[] = { nullptr };
 const char* spotify_prefixes[] = { "spotify:", nullptr };
 
 const char spotify_configdialog[] =
-    "property \"Soloist WebSocket Port\" spinbtn[1024,65535,1] spotify_soloist.ws_port 9090;\n"
+    "property \"Soloist WebSocket Port\" spinbtn[1024,65535,1] spotify_soloist.ws_port 9099;\n"
     "property \"Auto-start Soloist if not running\" checkbox spotify_soloist.auto_spawn 1;\n"
     "property \"Soloist Device Name (blank = DeaDBeeF-<host>)\" entry spotify_soloist.device_name \"\";\n"
     "property \"Soloist Executable Path (blank = PATH)\" file spotify_soloist.soloist_path \"\";\n"

@@ -1,6 +1,6 @@
 # DeaDBeeF Spotify Soloist Plugin
 
-A DeaDBeeF plugin that bridges **Spotify Web API** search, **XSPF** playlist save/restore, and **Spotify Soloist** audio playback via local WebSocket (`ws://127.0.0.1:9090`).
+A DeaDBeeF plugin that bridges **Spotify Web API** search, **XSPF** playlist save/restore, and **Spotify Soloist** audio playback via local WebSocket (`ws://127.0.0.1:9099`).
 
 ## Architecture
 

@@ -59,9 +59,10 @@ private:
     void on_text_message(const std::string& msg);
 
     mutable std::mutex mutex_;
-    std::string ws_url_ = "ws://127.0.0.1:9090";
+    static constexpr int kDefaultWsPort = 9099;
+    std::string ws_url_ = "ws://127.0.0.1:9099";
     std::string ws_host_ = "127.0.0.1";
-    int ws_port_ = 9090;
+    int ws_port_ = kDefaultWsPort;
     std::string exe_path_;
     std::string api_key_;
     std::string device_name_;

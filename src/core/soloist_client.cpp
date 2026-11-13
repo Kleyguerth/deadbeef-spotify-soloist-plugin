@@ -124,7 +124,7 @@ void SoloistClient::set_callbacks(ConnectionCallback on_conn, StateCallback on_s
 void SoloistClient::configure_launch(int ws_port, const std::string& exe_path,
                                      const std::string& api_key,
                                      const std::string& device_name, bool auto_spawn) {
-    int clamped_port = (ws_port > 0 && ws_port <= 65535) ? ws_port : 9090;
+    int clamped_port = (ws_port > 0 && ws_port <= 65535) ? ws_port : kDefaultWsPort;
     std::string new_url = "ws://127.0.0.1:" + std::to_string(clamped_port);
     {
         std::lock_guard lock(mutex_);
@@ -183,7 +183,7 @@ std::string SoloistClient::last_error() const {
 
 void SoloistClient::connect_to_server() {
     std::string host;
-    int port = 9090;
+    int port = kDefaultWsPort;
     {
         std::lock_guard lock(mutex_);
         if (connected_) return;
@@ -265,7 +265,7 @@ void SoloistClient::try_spawn_soloist() {
     std::string exe_copy;
     std::string key_copy;
     std::string dev_copy;
-    int port_copy = 9090;
+    int port_copy = kDefaultWsPort;
     {
         std::lock_guard lock(mutex_);
         if (!auto_spawn_) {
