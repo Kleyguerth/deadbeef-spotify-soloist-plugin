@@ -1,0 +1,68 @@
+name: Build & Release Windows Plugin
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup MSYS2 UCRT64 toolchain and dependencies
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          update: true
+          install: >-
+            mingw-w64-ucrt-x86_64-gcc
+            mingw-w64-ucrt-x86_64-cmake
+            mingw-w64-ucrt-x86_64-ninja
+            mingw-w64-ucrt-x86_64-pkgconf
+            mingw-w64-ucrt-x86_64-nlohmann-json
+            mingw-w64-ucrt-x86_64-gtk3
+
+      - name: Configure and build plugin
+        run: |
+          cmake -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_PREFIX=/ucrt64 \
+            -DBUILD_TESTS=ON
+          cmake --build build -j"$(nproc)"
+          ctest --test-dir build --output-on-failure
+
+      - name: Package clean Windows plugin ZIP
+        run: |
+          mkdir -p dist/plugins
+          cp build/ddb_spotify_soloist.dll dist/plugins/
+          cp build/ddb_spotify_xspf.dll dist/plugins/
+          cp build/ddb_spotify_gtkui.dll dist/plugins/
+
+          # Copy any non-system, non-GTK3 UCRT64 DLLs if dynamically linked
+          for mod in dist/plugins/*.dll; do
+            ldd "$mod" | awk '/\/ucrt64\/bin\// {print $3}' | { grep -viE 'libgtk-3|libgdk-3|libpango|libcairo|libgdk_pixbuf|libgio|libgobject|libglib|libgmodule|libatk|libepoxy|libharfbuzz|libfontconfig|libfreetype|libpixman|libpng|libfribidi|libthai|libdatrie|libgraphite|libintl|libiconv|libpcre2|libffi|zlib1|libzstd|libbrotli|libbz2|libexpat|libstdc\+\+-6|libgcc_s_seh-1|libwinpthread-1' || true; } | xargs -r -I{} cp -u {} dist/plugins/
+          done
+
+          ls -la dist/plugins/
+
+          cd dist
+          cmake -E tar cf ../deadbeef-spotify-soloist-win64.zip --format=zip plugins
+
+      - name: Upload ZIP to GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: deadbeef-spotify-soloist-win64.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

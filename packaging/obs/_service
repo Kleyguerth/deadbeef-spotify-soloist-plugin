@@ -1,0 +1,14 @@
+<services>
+  <service name="tar_scm">
+    <param name="scm">git</param>
+    <param name="url">https://github.com/Kleyguerth/deadbeef-spotify-soloist-plugin.git</param>
+    <param name="revision">v0.1.0</param>
+    <param name="versionformat">0.1.0</param>
+    <param name="filename">deadbeef-plugin-spotify-soloist</param>
+  </service>
+  <service name="recompress">
+    <param name="file">*.tar</param>
+    <param name="compression">gz</param>
+  </service>
+  <service name="set_version" />
+</services>
