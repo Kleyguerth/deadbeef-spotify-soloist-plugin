@@ -1,0 +1,17 @@
+name: Trigger OBS Build
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  trigger-obs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger OBS source service
+        run: |
+          curl -fsS -X POST \
+            -H "Authorization: Token ${{ secrets.OBS_TOKEN }}" \
+            "https://api.opensuse.org/trigger/runservice"
