@@ -61,6 +61,15 @@ bool is_item_spotify(DB_playItem_t* it) {
     return result;
 }
 
+bool is_playing_spotify() {
+    if (!deadbeef) return false;
+    DB_playItem_t* playing = deadbeef->streamer_get_playing_track();
+    if (!playing) return false;
+    bool result = is_item_spotify(playing);
+    deadbeef->pl_item_unref(playing);
+    return result;
+}
+
 extern DB_decoder_t plugin;
 
 DB_fileinfo_t* spotify_open(uint32_t /*hints*/) {
@@ -206,24 +215,34 @@ int spotify_stop() {
 int spotify_message(uint32_t id, uintptr_t ctx, uint32_t p1, uint32_t /*p2*/) {
     switch (id) {
         case DB_EV_PAUSED:
-            if (p1) {
-                SoloistClient::instance().pause();
-            } else {
-                SoloistClient::instance().resume();
+            if (is_playing_spotify()) {
+                if (p1) {
+                    SoloistClient::instance().pause();
+                } else {
+                    SoloistClient::instance().resume();
+                }
             }
             break;
         case DB_EV_STOP:
-            SoloistClient::instance().pause();
+            if (SoloistClient::instance().is_connected()) {
+                SoloistClient::instance().pause();
+            }
             break;
         case DB_EV_SONGCHANGED: {
             auto* tc = reinterpret_cast<ddb_event_trackchange_t*>(ctx);
-            if (tc && is_item_spotify(tc->from) && !is_item_spotify(tc->to)) {
-                SoloistClient::instance().pause();
+            if (tc && !is_item_spotify(tc->to)) {
+                auto& soloist = SoloistClient::instance();
+                if (is_item_spotify(tc->from) ||
+                    (soloist.is_connected() && soloist.state().status == SoloistStatus::Playing)) {
+                    soloist.pause();
+                }
             }
             break;
         }
         case DB_EV_VOLUMECHANGED:
-            sync_soloist_volume();
+            if (SoloistClient::instance().is_connected()) {
+                sync_soloist_volume();
+            }
             break;
         case DB_EV_CONFIGCHANGED:
             apply_soloist_config();
